@@ -1,0 +1,13 @@
+{
+    "terminal.integrated.profiles.windows": {  
+    "PowerShell": {  
+    "source": "PowerShell",  
+    "icon": "terminal-powershell",  
+    "args": ["-ExecutionPolicy", "RemoteSigned"]  
+    }  
+    },  
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "debugpy.debugJustMyCode": false,
+    "jupyter.debugJustMyCode": false,
+    "C_Cpp.workspaceSymbols": "All"
+}
