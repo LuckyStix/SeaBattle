@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Успешная авторизация</title>
+</head>
+<body>
+    <h1>Авторизация успешно завершена.</h1>
+    <p>Добро пожаловать, {{ nickname }}!</p>
+
+    <!-- Кнопка для подбора игроков -->
+    <a href="/game/create?nickname={{ nickname }}"><button>Подбор игроков</button></a>
+
+    <!-- Кнопка для обновления списка онлайн-игроков -->
+    <button onclick="getOnlinePlayers()">Обновить список онлайн-игроков</button>
+
+    <!-- Блок для отображения списка онлайн-игроков -->
+    <h2>Онлайн-игроки:</h2>
+    <ul id="players-list"></ul>
+
+    <!-- Кнопка для выхода -->
+    <a href="/logout/{{ nickname }}">Выход</a>
+
+    <script>
+        // Функция для получения списка онлайн-игроков
+        async function getOnlinePlayers() {
+            try {
+                const response = await fetch("/players");  // Запрашиваем список онлайн-игроков
+                const data = await response.json();  // Получаем ответ в формате JSON
+                const playersListDiv = document.getElementById("players-list");
+                playersListDiv.innerHTML = "";  // Очищаем список перед обновлением
+                
+                if (data.players.length === 0) {
+                    playersListDiv.textContent = "Нет игроков онлайн.";
+                } else {
+                    data.players.forEach(player => {
+                        playersListDiv.innerHTML += `<li>${player}</li>`;  // Добавляем каждого игрока в список
+                    });
+                }
+            } catch (err) {
+                console.error("Ошибка при получении списка онлайн-игроков:", err);
+            }
+        }
+
+        // Получаем список онлайн-игроков при загрузке страницы
+        window.onload = () => {
+            getOnlinePlayers();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Комната игры</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        ul.chat-history {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        li.chat-message {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Комната игры</h1>
+    <p>Номер комнаты: {{ room_id }}</p>
+    <p id="room-status">Статус комнаты: {{ game.status }}</p>
+
+    <!-- Чат -->
+    <h2>Чат</h2>
+    <ul id="chat-history" class="chat-history"></ul>
+    <input type="text" id="message-input" placeholder="Введите сообщение...">
+    <button onclick="sendMessage()">Отправить</button>
+
+    <!-- Блок для отображения игроков -->
+    <h2>Игроки в комнате:</h2>
+    <ul id="players-list">
+        <li>Игрок 1: {{ game.player1 }}</li>
+        {% if game.player2 %}
+            <li>Игрок 2: {{ game.player2 }}</li>
+        {% endif %}
+    </ul>
+
+
+    <script>
+        const socket = new WebSocket(`ws://127.0.0.1:8000/game/${{ room_id }}/chat`);
+
+        socket.onopen = () => {
+            console.log("Подключён к чату.");
+        };
+
+        socket.onmessage = event => {
+            const data = JSON.parse(event.data);
+            if (data.type === "room_update") {
+                document.getElementById("room-status").textContent = `Статус комнаты: ${data.status}`;
+                const playersList = document.getElementById("players-list");
+                playersList.innerHTML = '';
+                data.players.forEach(player => {
+                    const playerItem = document.createElement("li");
+                    playerItem.textContent = player || "---";
+                    playersList.appendChild(playerItem);
+                });
+            } else {
+                const history = document.getElementById("chat-history");
+                const messageItem = document.createElement("li");
+                messageItem.className = "chat-message";
+                messageItem.textContent = `${data.sender}: ${data.message}`;
+                history.appendChild(messageItem);
+            }
+        };
+
+        socket.onclose = () => {
+            console.log("Соединение с чатом закрыто.");
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("message-input");
+            const message = input.value.trim();
+            if (message) {
+                socket.send(JSON.stringify({
+                    sender: "{{ nickname }}",
+                    message: message
+                }));
+                input.value = "";
+            }
+        }
+    </script>
+</body>
+</html>
